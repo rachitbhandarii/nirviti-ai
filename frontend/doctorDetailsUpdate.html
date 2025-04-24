@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update Doctor Details</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .doctor-info {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    .doctor-info p {
+      margin: 8px 0;
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #000;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Update Doctor Details</h2>
+
+    <!-- Search Doctor -->
+    <input type="text" placeholder="Enter Doctor ID" id="searchDoctor">
+
+    <!-- Doctor Info (to be shown after search) -->
+    <div class="doctor-info" id="doctorInfo" style="display: none;">
+      <p><strong>First Name:</strong> Aryan</p>
+      <p><strong>Second Name:</strong> Verma</p>
+      <p><strong>Specialization:</strong> Cardiologist</p>
+      <p><strong>Mobile Number:</strong> 9876543210</p>
+      <p><strong>Experience:</strong> 10 years</p>
+      <p><strong>Department:</strong> Cardiology</p>
+      <p><strong>Availability Status:</strong> Available</p>
+    </div>
+
+    <!-- Update Section -->
+    <div id="updateSection" style="display: none;">
+      <select id="doctorField">
+        <option value="">Select field to update</option>
+        <option value="firstName">First Name</option>
+        <option value="secondName">Second Name</option>
+        <option value="specialization">Specialization</option>
+        <option value="mobileNumber">Mobile Number</option>
+        <option value="experience">Experience</option>
+        <option value="department">Department</option>
+        <option value="availabilityStatus">Availability Status</option>
+      </select>
+
+      <input type="text" placeholder="Enter new value" id="doctorNewValue">
+
+      <button onclick="submitDoctorUpdate()">Done</button>
+    </div>
+  </div>
+
+  <script>
+    const searchDoctor = document.getElementById('searchDoctor');
+    const doctorInfo = document.getElementById('doctorInfo');
+    const updateSection = document.getElementById('updateSection');
+
+    // Search trigger on input "Enter" key
+    searchDoctor.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        const doctorId = searchDoctor.value;
+        fetch(`http://localhost:10010/update/info/doctor/${doctorId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.length > 0) {
+              const doctor = data[0];
+              doctorInfo.innerHTML = `
+                <p><strong>First Name:</strong> ${doctor.firstName}</p>
+                <p><strong>Second Name:</strong> ${doctor.lastName}</p>
+                <p><strong>Specialization:</strong> ${doctor.specialization}</p>
+                <p><strong>Mobile Number:</strong> ${doctor.mobileNumber}</p>
+                <p><strong>Experience:</strong> ${doctor.experience}</p>
+                <p><strong>Department:</strong> ${doctor.departmentID}</p>
+                <p><strong>Availability Status:</strong> ${doctor.availabilityStatus}</p>
+              `;
+              doctorInfo.style.display = 'block';
+              updateSection.style.display = 'block';
+            } else {
+              alert('No doctor found with this ID');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error fetching doctor details');
+          });
+      }
+    });
+
+    function submitDoctorUpdate() {
+      const doctorId = searchDoctor.value;
+      const field = document.getElementById('doctorField').value;
+      const newVal = document.getElementById('doctorNewValue').value;
+
+      if (!field || !newVal) {
+        alert('Please select a field and enter a value.');
+        return;
+      }
+
+      fetch(`http://localhost:10010/update/info/doctor/${doctorId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([{
+          update: field,
+          val: newVal
+        }])
+      })
+      .then(response => response.text())
+      .then(result => {
+        if (result === 'OK') {
+          alert('Update successful!');
+          // Refresh the doctor info
+          const event = new KeyboardEvent('keypress', { key: 'Enter' });
+          searchDoctor.dispatchEvent(event);
+        } else {
+          alert('Update failed');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating doctor details');
+      });
+    }
+  </script>
+
+</body>
+</html>

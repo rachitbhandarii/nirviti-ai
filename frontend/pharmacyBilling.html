@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NirvitiAI | Pharmacy Checkout</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>NirvitiAI</h1>
+      <h2>Pharmacy Checkout</h2>
+    </div>
+
+    <div class="form-container">
+      <div id="billing-form" class="form-section active">
+        <input type="number" placeholder="Patient ID" required>
+        <input type="number" placeholder="Record ID" required>
+        <input type="number" placeholder="Item Name" required>
+        <input type="number" placeholder="Total Amount" required>
+        <input type="text" placeholder="Mode of Payment (e.g., UPI/Card/Cash)" required>
+        <input type="number" placeholder="Discount" required>
+        <input type="date" placeholder="Billing Date" required>
+
+        <button type="submit">Generate Bill</button>
+        <button onclick="window.open('discounts.html', '_blank')">View Available Discounts</button>
+      </div>
+    </div>
+
+  <script src="login.js"></script>
+
+</body>
+</html>

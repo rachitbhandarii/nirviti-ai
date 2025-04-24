@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NirvitiAI | Hospital Admin Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>NirvitiAI</h1>
+      <h2>Hospital Admin Login</h2>
+    </div>
+
+    <div class="form-container">
+      <div class="form-section active">
+        <input type="text" id="username" placeholder="Admin Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="authenticate()">Log In</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function authenticate() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      console.log('Attempting login with:', { username, password });
+
+      fetch(`http://localhost:10010/doctordb/authenticate?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/plain'
+        }
+      })
+      .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        return response.text();
+      })
+      .then(result => {
+        console.log('Response text:', result);
+        if (result.trim() === 'ok') {
+          window.location.href = 'adminDashboard.html';
+        } else {
+          alert('Invalid credentials. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Error details:', error);
+        alert('An error occurred during authentication. Please try again.');
+      });
+    }
+  </script>
+
+</body>
+</html>

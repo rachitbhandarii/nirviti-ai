@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NirvitiAI | Login & Signup</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>NirvitiAI</h1>
+      <h2>A visionary AI-driven hospital management solution</h2>
+    </div>
+
+    <div class="form-container">
+
+      <!-- Toggle Buttons (Above Forms) -->
+      <div class="toggle-links">
+        <button id="login-toggle" class="active" onclick="showForm('login')">Log In</button>
+        <button id="signup-toggle" onclick="showForm('signup')">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-section" class="form-section active">
+        <input type="text" placeholder="Email or Username">
+        <input type="password" placeholder="Password">
+        <button type="submit">Log In</button>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="signup-section" class="form-section">
+        <input type="text" placeholder="Full Name">
+        <input type="email" placeholder="Email">
+        <input type="password" placeholder="Password">
+        <input type="password" placeholder="Confirm Password">
+        <button type="submit">Sign Up</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="login.js"></script>
+
+</body>
+</html>

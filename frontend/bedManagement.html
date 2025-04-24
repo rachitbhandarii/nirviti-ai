@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NirvitiAI | Bed Management</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    input, select {
+      height: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>NirvitiAI</h1>
+      <h2>Hospital Bed Management</h2>
+    </div>
+
+    <div class="form-container">
+      <div class="toggle-links">
+        <button id="allocate-toggle" class="active" onclick="showForm('allocate')">Allocate Bed</button>
+        <button id="discharge-toggle" onclick="showForm('discharge')">Discharge Patient</button>
+      </div>
+
+      <!-- Bed Allocation Form -->
+      <div id="allocate-section" class="form-section active">
+        <input type="text" id="allocate-bed-number" placeholder="Bed Number" required>
+        <select id="allocate-bed-type" required>
+          <option value="" disabled selected>Select Bed Type</option>
+          <option value="Single">General</option>
+          <option value="Double">Private</option>
+        </select>
+        <input type="number" id="allocate-ward-number" placeholder="Ward Number" required>       
+        <input type="text" id="allocate-patient-id" placeholder="Patient ID" required>     
+        <button type="submit" id="allocate-btn">Allocate Bed</button>
+      </div>
+
+      <!-- Discharge Form -->
+      <div id="discharge-section" class="form-section">
+        <input type="text" id="discharge-patient-id" placeholder="Patient ID" required>
+        <input type="text" id="discharge-bed-number" placeholder="Bed Number" required>
+        <input type="number" id="discharge-ward-number" placeholder="Ward Number" required>
+        <button type="submit" id="discharge-btn">Process Discharge</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showForm(form) {
+      const allocateSection = document.getElementById('allocate-section');
+      const dischargeSection = document.getElementById('discharge-section');
+      const allocateToggle = document.getElementById('allocate-toggle');
+      const dischargeToggle = document.getElementById('discharge-toggle');
+    
+      if (form === 'allocate') {
+        allocateSection.classList.add('active');
+        dischargeSection.classList.remove('active');
+        allocateToggle.classList.add('active');
+        dischargeToggle.classList.remove('active');
+      } else {
+        dischargeSection.classList.add('active');
+        allocateSection.classList.remove('active');
+        dischargeToggle.classList.add('active');
+        allocateToggle.classList.remove('active');
+      }
+    }
+
+    // Form submission handler
+    document.querySelectorAll('button[type="submit"]').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Check which form is active
+        const allocateSection = document.getElementById('allocate-section');
+        const isAllocateForm = allocateSection.classList.contains('active');
+        
+        if (isAllocateForm) {
+          // Handle bed allocation
+          const bedNumber = document.getElementById('allocate-bed-number').value;
+          const patientID = document.getElementById('allocate-patient-id').value;
+          
+          const formData = [{
+            "bedNumber": bedNumber,
+            "patientID": patientID
+          }];
+
+          fetch('http://localhost:10010/update/bed/allocate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.text();
+          })
+          .then(data => {
+            if (data === 'OK') {
+              alert('Bed allocated successfully!');
+              // Clear form
+              //document.getElementById('allocate-section').reset();
+            } else {
+              throw new Error('Unexpected response from server');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to allocate bed. Please try again.');
+          });
+
+          form.reset();
+        } else {
+          // Handle bed deallocation
+          const bedNumber = document.getElementById('discharge-bed-number').value;
+          
+          const formData = [{
+            "bedNumber": bedNumber
+          }];
+
+          fetch('http://localhost:10010/update/bed/deallocate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.text();
+          })
+          .then(data => {
+            if (data === 'OK') {
+              alert('Bed deallocated successfully!');
+              // Clear form
+              //document.getElementById('discharge-section').reset();
+            } else {
+              throw new Error('Unexpected response from server');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to deallocate bed. Please try again.');
+          });
+          form.reset();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

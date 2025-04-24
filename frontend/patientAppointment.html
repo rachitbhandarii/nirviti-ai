@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NirvitiAI | Patient Appointment</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>NirvitiAI</h1>
+      <h2>Patient Appointment </h2>
+    </div>
+
+    <div class="form-container">
+
+      <!-- Toggle Buttons (Above Forms) -->
+       <div class="toggle-links">
+        <button id="booking-toggle" class="active" onclick="showForm('booking')">Book</button>
+        <button id="cancel-toggle" onclick="showForm('cancel')">Cancel</button>
+      </div> 
+
+      <!-- Booking Form -->
+      <div id="booking-section" class="form-section active">
+        <input type="text" placeholder="First Name" required>
+        <input type="text" placeholder="Last Name" required>
+        <input type="text" placeholder="Patient ID" required>
+        <select required>
+          <option value="" disabled selected>Select Department</option>
+          <option value="cardiology">Cardiology</option>
+          <option value="dermatology">Dermatology</option>
+          <option value="neurology">Neurology</option>
+          <option value="orthopedics">Orthopedics</option>
+          <option value="pediatrics">Pediatrics</option>
+          <option value="psychiatry">Psychiatry</option>
+          <option value="generalMedicine">General Medicine</option>
+        </select>
+        <input type="text" placeholder="Doctor Name" required>
+        <input type="text" placeholder="Doctor ID" required>
+        <input type="date" placeholder="Appointment Date" required>
+        <select required>
+          <option value="" disabled selected>Select Time Slot</option>
+          <option value="0900">09:00 AM - 09:30 AM</option>
+          <option value="0930">09:30 AM - 10:00 AM</option>
+          <option value="1000">10:00 AM - 10:30 AM</option>
+          <option value="1030">10:30 AM - 11:00 AM</option>
+          <option value="1100">11:00 AM - 11:30 AM</option>
+          <option value="1130">11:30 AM - 12:00 PM</option>
+          <option value="1400">02:00 PM - 02:30 PM</option>
+          <option value="1430">02:30 PM - 03:00 PM</option>
+          <option value="1500">03:00 PM - 03:30 PM</option>
+          <option value="1530">03:30 PM - 04:00 PM</option>
+          <option value="1600">04:00 PM - 04:30 PM</option>
+          <option value="1630">04:30 PM - 05:00 PM</option>
+        </select>
+        <button type="submit">Book Appointment</button>
+      </div>
+
+      <!-- Cancel Form -->
+      <div id="cancel-section" class="form-section">
+        <input type="text" placeholder="Appointment ID" required>
+        <input type="text" placeholder="Patient ID" required>
+        <input type="text" placeholder="Patient Name" required>
+        <select required>
+          <option value="" disabled selected>Reason for Cancellation</option>
+          <option value="reschedule">Need to Reschedule</option>
+          <option value="notNeeded">Service No Longer Needed</option>
+          <option value="doctor">Doctor Unavailable</option>
+          <option value="emergency">Personal Emergency</option>
+          <option value="other">Other Reason</option>
+        </select>
+        <button type="submit">Cancel Appointment</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function showForm(form) {
+      const bookingSection = document.getElementById('booking-section');
+      const cancelSection = document.getElementById('cancel-section');
+      const bookingToggle = document.getElementById('booking-toggle');
+      const cancelToggle = document.getElementById('cancel-toggle');
+    
+      if (form === 'booking') {
+        bookingSection.classList.add('active');
+        cancelSection.classList.remove('active');
+        bookingToggle.classList.add('active');
+        cancelToggle.classList.remove('active');
+      } else {
+        cancelSection.classList.add('active');
+        bookingSection.classList.remove('active');
+        cancelToggle.classList.add('active');
+        bookingToggle.classList.remove('active');
+      }
+    }
+
+    // Form submission handlers
+    document.querySelectorAll('button[type="submit"]').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (this.textContent === 'Book Appointment') {
+          const formData = [{
+            "patientID": document.querySelector('#booking-section input[placeholder="Patient ID"]').value,
+            "doctorID": document.querySelector('#booking-section input[placeholder="Doctor ID"]').value
+          }];
+
+          fetch('http://localhost:10010/update/appointment/book', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          })
+          .then(response => response.text())
+          .then(result => {
+            if (result === 'OK') {
+              alert('Appointment booked successfully!');
+            } else {
+              alert('Appointment booking failed');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error booking appointment');
+          });
+        } else {
+          const formData = [{
+            "appointmentID": document.querySelector('#cancel-section input[placeholder="Appointment ID"]').value
+          }];
+
+          fetch('http://localhost:10010/update/appointment/cancel', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          })
+          .then(response => response.text())
+          .then(result => {
+            if (result === 'OK') {
+              alert('Appointment cancelled successfully!');
+            } else {
+              alert('Appointment cancellation failed');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error cancelling appointment');
+          });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

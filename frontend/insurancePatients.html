@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patients with Insurance</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .info {
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #1e1e1e;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+      color: #666;
+    }
+
+    .error {
+      text-align: center;
+      padding: 20px;
+      color: #d32f2f;
+      font-weight: bold;
+    }
+
+    .refresh-button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #1e1e1e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .refresh-button:hover {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Patients with Insurance</h2>
+    <div class="info">List of patients and their insurance numbers</div>
+
+    <table id="insuranceTable">
+      <div class="loading"></div>
+    </table>
+
+    <button class="refresh-button" onclick="refreshData()">Refresh Data</button>
+  </div>
+
+  <script src="tableLoader.js"></script>
+  <script>
+    // Define table headers
+    const headers = [
+      'Patient ID', 'Patient Name', 'Insurance Number'
+    ];
+
+    // Data formatter function specific to insurance data
+    function formatInsuranceData(item) {
+      return [
+        item.patientID,
+        item.PatientName,
+        item.insuranceNumber
+      ];
+    }
+
+    // Function to load table data
+    function loadTable() {
+      const table = document.getElementById('insuranceTable');
+      table.innerHTML = '<div class="loading">Loading data...</div>';
+      
+      loadTableData(
+        'insuranceTable',
+        'http://localhost:10010/complex/query10',
+        headers,
+        formatInsuranceData
+      ).catch(error => {
+        console.error('Error loading table:', error);
+        table.innerHTML = '<div class="error">Error loading data. Please try again.</div>';
+      });
+    }
+
+    // Function to refresh data
+    function refreshData() {
+      loadTable();
+    }
+
+    // Load table data when the page loads
+    document.addEventListener('DOMContentLoaded', loadTable);
+  </script>
+
+</body>
+</html>

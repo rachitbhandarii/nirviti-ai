@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Categorization by Age Group</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .dropdown {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      width: 260px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #1e1e1e;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .info {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+      color: #666;
+    }
+
+    .error {
+      text-align: center;
+      padding: 20px;
+      color: #d32f2f;
+      font-weight: bold;
+    }
+
+    .refresh-button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #1e1e1e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .refresh-button:hover {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Patient Categorization by Age Group</h2>
+    <div class="info">Select an age category to view data by gender and blood group</div>
+
+    <div class="dropdown">
+      <select id="ageCategoryFilter" onchange="filterTable()">
+        <option value="All">All Age Categories</option>
+        <option value="Child">Child (0–12)</option>
+        <option value="Teenager">Teenager (13–19)</option>
+        <option value="Young Adult">Young Adult (20–35)</option>
+        <option value="Middle-Aged Adult">Middle-Aged Adult (36–60)</option>
+        <option value="Senior Citizen">Senior Citizen (60+)</option>
+      </select>
+    </div>
+
+    <table id="patientCategorizationTable">
+      <div class="loading">Loading data...</div>
+    </table>
+
+    <button class="refresh-button" onclick="refreshData()">Refresh Data</button>
+  </div>
+
+  <script src="tableLoader.js"></script>
+  <script>
+    // Define table headers
+    const headers = [
+      'Age Category', 'Gender', 'Blood Group', 'Patient Count'
+    ];
+
+    // Data formatter function specific to patient categorization
+    function formatPatientCategorizationData(item) {
+      return [
+        item.ageCategory,
+        item.gender,
+        item.bloodGroup,
+        item.patientCount
+      ];
+    }
+
+    // Function to load table data
+    function loadTable() {
+      const table = document.getElementById('patientCategorizationTable');
+      table.innerHTML = '<div class="loading">Loading data...</div>';
+      
+      loadTableData(
+        'patientCategorizationTable',
+        'http://localhost:10010/complex/query3',
+        headers,
+        formatPatientCategorizationData
+      ).catch(error => {
+        console.error('Error loading table:', error);
+        table.innerHTML = '<div class="error">Error loading data. Please try again.</div>';
+      });
+    }
+
+    // Function to filter table data
+    function filterTable() {
+      const selectedCategory = document.getElementById('ageCategoryFilter').value;
+      const table = document.getElementById('patientCategorizationTable');
+      const rows = table.getElementsByTagName('tr');
+      
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const ageCategoryCell = row.cells[0];
+        if (selectedCategory === 'All' || ageCategoryCell.textContent === selectedCategory) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    }
+
+    // Function to refresh data
+    function refreshData() {
+      loadTable();
+    }
+
+    // Load table data when the page loads
+    document.addEventListener('DOMContentLoaded', loadTable);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update Staff Details</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .staff-info {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    .staff-info p {
+      margin: 8px 0;
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #000;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Update Staff Details</h2>
+
+    <!-- Search Staff -->
+    <input type="text" placeholder="Enter Staff ID" id="searchStaff">
+
+    <!-- Staff Info (to be shown after search) -->
+    <div class="staff-info" id="staffInfo" style="display: none;">
+      <p><strong>First Name:</strong> Ananya</p>
+      <p><strong>Last Name:</strong> Sharma</p>
+      <p><strong>Role:</strong> Receptionist</p>
+      <p><strong>Mobile Number:</strong> 9876543210</p>
+      <p><strong>Address:</strong> Sector 21, Noida</p>
+      <p><strong>Department ID:</strong> D102</p>
+    </div>
+
+    <!-- Update Section -->
+    <div id="updateSection" style="display: none;">
+      <select id="staffField">
+        <option value="">Select field to update</option>
+        <option value="firstName">First Name</option>
+        <option value="lastName">Last Name</option>
+        <option value="role">Role</option>
+        <option value="mobileNumber">Mobile Number</option>
+        <option value="address">Address</option>
+        <option value="departmentID">Department ID</option>
+      </select>
+
+      <input type="text" placeholder="Enter new value" id="staffNewValue">
+
+      <button onclick="submitStaffUpdate()">Done</button>
+    </div>
+  </div>
+
+  <script>
+    const searchStaff = document.getElementById('searchStaff');
+    const staffInfo = document.getElementById('staffInfo');
+    const updateSection = document.getElementById('updateSection');
+
+    // Search trigger on input "Enter" key
+    searchStaff.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        const staffId = searchStaff.value;
+        fetch(`http://localhost:10010/update/info/staff/${staffId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.length > 0) {
+              const staff = data[0];
+              staffInfo.innerHTML = `
+                <p><strong>First Name:</strong> ${staff.firstName}</p>
+                <p><strong>Last Name:</strong> ${staff.lastName}</p>
+                <p><strong>Role:</strong> ${staff.role}</p>
+                <p><strong>Mobile Number:</strong> ${staff.mobileNumber}</p>
+                <p><strong>Address:</strong> ${staff.address}</p>
+                <p><strong>Department ID:</strong> ${staff.departmentID}</p>
+              `;
+              staffInfo.style.display = 'block';
+              updateSection.style.display = 'block';
+            } else {
+              alert('No staff found with this ID');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error fetching staff details');
+          });
+      }
+    });
+
+    function submitStaffUpdate() {
+      const staffId = searchStaff.value;
+      const field = document.getElementById('staffField').value;
+      const newVal = document.getElementById('staffNewValue').value;
+
+      if (!field || !newVal) {
+        alert('Please select a field and enter a value.');
+        return;
+      }
+
+      fetch(`http://localhost:10010/update/info/staff/${staffId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([{
+          update: field,
+          val: newVal
+        }])
+      })
+      .then(response => response.text())
+      .then(result => {
+        if (result === 'OK') {
+          alert('Update successful!');
+          // Refresh the staff info
+          const event = new KeyboardEvent('keypress', { key: 'Enter' });
+          searchStaff.dispatchEvent(event);
+        } else {
+          alert('Update failed');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating staff details');
+      });
+    }
+  </script>
+
+</body>
+</html>

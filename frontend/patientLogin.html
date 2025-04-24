@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NirvitiAI | Login & Signup</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>NirvitiAI</h1>
+      <h2>Patient Login</h2>
+    </div>
+
+    <div class="form-container">
+
+      <!-- Toggle Buttons (Above Forms) -->
+      <div class="toggle-links">
+        <button id="login-toggle" class="active" onclick="showForm('login')">Log In</button>
+        <button id="signup-toggle" onclick="showForm('signup')">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-section" class="form-section active">
+        <input type="text" id="patientId" placeholder="Patient ID">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="authenticate()">Log In</button>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="signup-section" class="form-section">
+        <div class="signup-columns">
+          <div class="left-column">
+            <input type="text" placeholder="First Name">
+            <input type="text" placeholder="Last Name">
+            <input type="number" placeholder="Age">
+            <input type="text" placeholder="Gender">
+            <input type="text" placeholder="Blood Group">
+            <input type="text" placeholder="Allergies">
+          </div>
+          <div class="right-column">
+            <input type="number" placeholder="Primary Contact No.">
+            <input type="number" placeholder="Secondary Contact No.">
+            <input type="text" placeholder="Address">
+            <input type="number" placeholder="Insurance Number">
+            <input type="email" placeholder="Email">
+            <input type="password" placeholder="Password">
+            <input type="password" placeholder="Confirm Password">
+          </div>
+        </div>
+        <button onclick="window.open('patientDashboard.html', '_blank')">Sign Up</button>
+      </div>
+
+  <script>
+    function showForm(formType) {
+      const loginSection = document.getElementById('login-section');
+      const signupSection = document.getElementById('signup-section');
+      const loginToggle = document.getElementById('login-toggle');
+      const signupToggle = document.getElementById('signup-toggle');
+
+      if (formType === 'login') {
+        loginSection.classList.add('active');
+        signupSection.classList.remove('active');
+        loginToggle.classList.add('active');
+        signupToggle.classList.remove('active');
+      } else {
+        loginSection.classList.remove('active');
+        signupSection.classList.add('active');
+        loginToggle.classList.remove('active');
+        signupToggle.classList.add('active');
+      }
+    }
+
+    function authenticate() {
+      const patientId = document.getElementById('patientId').value;
+      const password = document.getElementById('password').value;
+
+      fetch(`http://localhost:10010/patientdb/authenticate?patientId=${encodeURIComponent(patientId)}&password=${encodeURIComponent(password)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.text())
+      .then(result => {
+        if (result === 'ok') {
+          window.location.href = `patientDashboard.html?patientId=${patientId}`;
+        } else {
+          alert('Invalid credentials. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during authentication. Please try again.');
+      });
+    }
+  </script>
+
+</body>
+</html>

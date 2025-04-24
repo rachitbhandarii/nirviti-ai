@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NirvitiAI | Patient Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+    }
+
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #1e1e1e;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: width 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 80px;
+      overflow: hidden;
+    }
+
+    .sidebar h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      white-space: nowrap;
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 5px 0;
+      display: block;
+    }
+
+    .sidebar a:hover {
+      text-decoration: underline;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background-color: #f4f6f8;
+    }
+
+    .header-bar {
+      background-color: #fff;
+      padding: 15px 30px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-bar h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #1e1e1e;
+    }
+
+    .welcome {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
+      padding: 20px 30px 0;
+    }
+
+    .top-actions button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #1e1e1e;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .top-actions button:hover {
+      background-color: #333;
+    }
+
+    .content-wrapper {
+      padding: 20px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .patient-info, .summary-box, .appointments {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .summary-box {
+      min-height: 120px;
+    }
+
+    .appointments table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .appointments th, .appointments td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+
+    .appointments th {
+      background-color: #1e1e1e;
+      color: white;
+    }
+
+    .appointments tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .appointments tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .toggle-btn {
+      background-color: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+
+    .sidebar.collapsed .link-text {
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-style: italic;
+      color: #666;
+    }
+
+    .error {
+      text-align: center;
+      padding: 20px;
+      color: #d32f2f;
+      font-weight: bold;
+    }
+
+    .refresh-button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #1e1e1e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .refresh-button:hover {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard">
+
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+      <h3 class="link-text">Dashboard</h3>
+      <a href="#appointment-section"><span class="link-text">Appointments</span></a>
+      <a href="#summary-section"><span class="link-text">Summary</span></a>
+      <a href="index.html"><span class="link-text">Logout</span></a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <!-- Header Bar -->
+      <div class="header-bar">
+        <h1>NirvitiAI</h1>
+        <div class="welcome">Welcome, <span id="patientName">Loading...</span>!</div>
+      </div>
+
+      <!-- Top Action Buttons -->
+      <div class="top-actions">
+        <button onclick="window.open('patientAppointment.html', '_blank')">Book Appointment</button>
+        <button onclick="alert('Emergency registration has been successfully taken. Our team will contact you shortly.')" style="background-color: red; color: white;">Emergency</button>
+      </div>
+
+      <!-- Content -->
+      <div class="content-wrapper">
+
+        <!-- Patient Info -->
+        <div class="patient-info">
+          <h2>Patient Information</h2>
+          <div id="patientInfo">
+            <div class="loading">Loading patient information...</div>
+          </div>
+        </div>
+
+        <!-- AI Summary -->
+        <div class="summary-box">
+          <h2>AI Health Summary</h2>
+          <div id="healthSummary">
+            <div class="loading">Loading health summary...</div>
+          </div>
+        </div>
+
+        <!-- Appointments -->
+        <div class="appointments">
+          <h2>Appointment History</h2>
+          <table id="appointmentsTable">
+          </table>
+          <button class="refresh-button" onclick="refreshData()">Refresh Data</button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script src="tableLoader.js"></script>
+  <script>
+    // Function to get patient ID from URL parameters
+    function getPatientIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const patientId = urlParams.get('patientId');
+      return patientId;
+    }
+
+    // Define table headers for appointments
+    const headers = [
+      'Date', 'Doctor Name', 'Department',
+      'Status'
+    ];
+
+    // Data formatter function for appointments
+    function formatAppointmentData(item) {
+      return [
+        formatDate(item.dateTime),
+        item.doctorName,
+        item.departmentName,
+        item.status
+      ];
+    }
+
+    // Function to load patient information
+    function loadPatientInfo() {
+      const patientId = getPatientIdFromUrl();
+      const patientInfoDiv = document.getElementById('patientInfo');
+      patientInfoDiv.innerHTML = '<div class="loading">Loading patient information...</div>';
+      
+      if (!patientId) {
+        patientInfoDiv.innerHTML = '<div class="error">Please provide a patient ID in the URL (e.g., ?patientId=123)</div>';
+        return;
+      }
+
+      fetch(`http://localhost:10010/patientdb/getInfo/${patientId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            const patient = data[0];
+            document.getElementById('patientName').textContent = `${patient.firstName} ${patient.lastName}`;
+            patientInfoDiv.innerHTML = `
+              <p><strong>Name:</strong> ${patient.firstName} ${patient.lastName}</p>
+              <p><strong>Age:</strong> ${patient.age}</p>
+              <p><strong>Gender:</strong> ${patient.gender}</p>
+              <p><strong>Blood Group:</strong> ${patient.bloodGroup}</p>
+              <p><strong>Allergies:</strong> ${patient.allergies}</p>
+              <p><strong>Insurance Number:</strong> ${patient.insuranceNumber}</p>
+            `;
+          } else {
+            patientInfoDiv.innerHTML = '<div class="error">No patient data found</div>';
+          }
+        })
+        .catch(error => {
+          console.error('Error loading patient info:', error);
+          patientInfoDiv.innerHTML = '<div class="error">Error loading patient information</div>';
+        });
+    }
+
+    // Function to load health summary
+    function loadHealthSummary() {
+      const patientId = getPatientIdFromUrl();
+      const summaryDiv = document.getElementById('healthSummary');
+      summaryDiv.innerHTML = '<div class="loading">Loading health summary...</div>';
+      
+      if (!patientId) {
+        summaryDiv.innerHTML = '<div class="error">Please provide a patient ID in the URL (e.g., ?patientId=123)</div>';
+        return;
+      }
+
+      fetch(`http://localhost:10010/ai/patientSummary/${patientId}`)
+        .then(response => {
+          // First try to parse as JSON
+          return response.text().then(text => {
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              // If parsing fails, return the text directly
+              return text;
+            }
+          });
+        })
+        .then(data => {
+          if (typeof data === 'string') {
+            // If we got text directly, display it
+            summaryDiv.innerHTML = `
+              <div style="white-space: pre-wrap;">${data}</div>
+            `;
+          } else if (data && data.length > 0) {
+            // If we got JSON, process it as before
+            const patient = data[0];
+            summaryDiv.innerHTML = `
+              <p><strong>Recent Appointments:</strong> ${patient.totalAppointments || 0}</p>
+              <p><strong>Recent Tests:</strong> ${patient.testName || 'None'}</p>
+              <p><strong>Current Status:</strong> ${patient.status || 'No active appointments'}</p>
+              <p><strong>Last Visit:</strong> ${formatDate(patient.appointmentDate) || 'N/A'}</p>
+            `;
+          } else {
+            summaryDiv.innerHTML = '<div class="error">No health summary available</div>';
+          }
+        })
+        .catch(error => {
+          console.error('Error loading health summary:', error);
+          summaryDiv.innerHTML = '<div class="error">Error loading health summary</div>';
+        });
+    }
+
+    // Function to load appointments table
+    function loadAppointments() {
+      const patientId = getPatientIdFromUrl();
+      const table = document.getElementById('appointmentsTable');
+      table.innerHTML = '<div class="loading">Loading appointments...</div>';
+      
+      if (!patientId) {
+        table.innerHTML = '<div class="error">Please provide a patient ID in the URL (e.g., ?patientId=123)</div>';
+        return;
+      }
+
+      loadTableData(
+        'appointmentsTable',
+        `http://localhost:10010/patientdb/getHistory/${patientId}`,
+        headers,
+        formatAppointmentData
+      ).catch(error => {
+        console.error('Error loading appointments:', error);
+        table.innerHTML = '<div class="error">Error loading appointments. Please try again.</div>';
+      });
+    }
+
+    // Function to refresh all data
+    function refreshData() {
+      loadPatientInfo();
+      loadHealthSummary();
+      loadAppointments();
+    }
+
+    // Function to toggle sidebar
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("collapsed");
+    }
+
+    // Load all data when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const patientId = getPatientIdFromUrl();
+      if (!patientId) {
+        document.body.innerHTML = `
+          <div class="error" style="text-align: center; padding: 20px;">
+            <h2>No Patient ID Provided</h2>
+            <p>Please access this page with a patient ID in the URL, for example:</p>
+            <p><code>patientDashboard.html?patientId=123</code></p>
+          </div>
+        `;
+        return;
+      }
+      loadPatientInfo();
+      loadHealthSummary();
+      loadAppointments();
+    });
+  </script>
+
+</body>
+</html>
